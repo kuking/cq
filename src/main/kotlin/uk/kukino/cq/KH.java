@@ -11,7 +11,7 @@ import java.security.spec.PKCS8EncodedKeySpec;
 import java.security.spec.X509EncodedKeySpec;
 import java.util.Base64;
 
-public class KeysHelper {
+public class KH {
 
     public static void init() {
         Security.addProvider(new BouncyCastleProvider());
@@ -19,7 +19,9 @@ public class KeysHelper {
 
     public static KeyPair getKeyPair() throws NoSuchAlgorithmException, NoSuchProviderException, InvalidAlgorithmParameterException {
         KeyPairGenerator keyGen = KeyPairGenerator.getInstance("ECDsA", "BC");
-        ECGenParameterSpec ecSpec = new ECGenParameterSpec("secp256k1");
+        // secp256k1 - secp384r1 - secp521r1 - sect571r1
+//        ECGenParameterSpec ecSpec = new ECGenParameterSpec("secp256k1");
+        ECGenParameterSpec ecSpec = new ECGenParameterSpec("sect571r1");
         keyGen.initialize(ecSpec, new SecureRandom());
         return keyGen.generateKeyPair();
     }

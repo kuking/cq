@@ -13,25 +13,32 @@ fun hexDump(bytes: ByteArray): String {
 
 fun main(rgs: Array<String>) {
 
+    // https://kjur.github.io/jsrsasign/sample/sample-ecdsa.html
     // https://stackoverflow.com/questions/49825455/ecdsa-signature-java-vs-go
 
-    KeysHelper.init()
+    KH.init()
 
-    val kp = KeysHelper.getKeyPair()
+    val kp = KH.getKeyPair()
 
     println(hexDump(kp.public.encoded))
-    println(kp.public)
-    println("Public: " + hexDump(KeysHelper.asECPublicKey(kp.public).encoded))
+    val publicKeyAgain = KH.bytesToPublicKey(kp.public.encoded)
+
+//    println(kp.public)
+    println("Public: " + hexDump(KH.asECPublicKey(kp.public).encoded))
+    println("Public.X: " + KH.asECPublicKey(kp.public).w.affineX.toString(16))
+    println("Public.Y: " + KH.asECPublicKey(kp.public).w.affineY.toString(16))
+    println("------")
+
 
     println(hexDump(kp.private.encoded))
-    println(kp.private)
-    println("Private: " + KeysHelper.asECPrivateKey(kp.private).s.toString(16))
+//    println(kp.private)
+    println("Private: " + KH.asECPrivateKey(kp.private).s.toString(16))
 
-//    KeyFactory.getInstance("EC").generatePrivate()
-
-    var signature = KeysHelper.sign(kp, "HOLA".toByteArray())
-    println(BigInteger(signature).toString(16))
-    println(KeysHelper.verify(KeysHelper.asECPublicKey(kp.public), "HOLA".toByteArray(), signature))
+    println("------")
+    var signature = KH.sign(kp, "HOLA".toByteArray())
+    println("Signature: " + BigInteger(signature).toString(16))
+    println("Verify: " + KH.verify(KH.asECPublicKey(kp.public), "HOLA".toByteArray(), signature))
+    println("Verify2: " + KH.verify(KH.asECPublicKey(publicKeyAgain), "HOLA".toByteArray(), signature))
 
 
 }
