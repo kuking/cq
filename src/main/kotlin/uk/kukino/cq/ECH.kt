@@ -12,6 +12,10 @@ import java.security.spec.ECGenParameterSpec
 import java.security.spec.ECPoint
 import java.security.spec.ECPrivateKeySpec
 import java.security.spec.ECPublicKeySpec
+import javax.crypto.Cipher
+import javax.crypto.KeyAgreement
+import javax.crypto.SecretKey
+import javax.crypto.spec.IvParameterSpec
 
 
 class ECH(val curve: String = "secp256k1",
@@ -19,6 +23,7 @@ class ECH(val curve: String = "secp256k1",
           val rand: SecureRandom = SecureRandom()) {
 
     val keySpec: ECNamedCurveSpec
+    var provider = "BC"
 
     init {
         Security.addProvider(BouncyCastleProvider())
@@ -30,7 +35,7 @@ class ECH(val curve: String = "secp256k1",
 
     @Throws(NoSuchAlgorithmException::class, NoSuchProviderException::class, InvalidAlgorithmParameterException::class)
     fun createKeyPair(): KeyPair {
-        val keyGen = KeyPairGenerator.getInstance("ECDSA", "BC")
+        val keyGen = KeyPairGenerator.getInstance("ECDSA", provider)
         val ecSpec = ECGenParameterSpec(this.curve)
         keyGen.initialize(ecSpec, this.rand)
         return keyGen.generateKeyPair()
@@ -68,6 +73,27 @@ class ECH(val curve: String = "secp256k1",
         signature.initVerify(pub)
         signature.update(payload)
         return signature.verify(sign)
+    }
+
+    fun encrypt(key: SecretKey, iv: ByteArray, payload: ByteArray): ByteArray {
+        val ivSpec = IvParameterSpec(iv)
+        val cipher = Cipher.getInstance("AES/CBC/PKCS5Padding", provider)
+        cipher.init(Cipher.ENCRYPT_MODE, key, ivSpec, rand)
+        return cipher.doFinal(payload)
+    }
+
+    fun decrypt(key: SecretKey, iv: ByteArray, payload: ByteArray): ByteArray {
+        val ivSpec = IvParameterSpec(iv)
+        val cipher = Cipher.getInstance("AES/CBC/PKCS5Padding", provider)
+        cipher.init(Cipher.DECRYPT_MODE, key, ivSpec, rand)
+        return cipher.doFinal(payload)
+    }
+
+    fun diffieHellman(pvt: PrivateKey, pub: PublicKey): SecretKey {
+        val agreement = KeyAgreement.getInstance("ECCDH", provider)
+        agreement.init(pvt)
+        agreement.doPhase(pub, true)
+        return agreement.generateSecret("SHA256")
     }
 
 }
