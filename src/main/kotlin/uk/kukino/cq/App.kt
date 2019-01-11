@@ -51,7 +51,4 @@ fun main(rgs: Array<String>) {
     println("Verify1: " + KH.verify(KH.asECPublicKey(publicKeyAgain), "HOLA".toByteArray(), signature2))
     println("Verify2: " + KH.verify(KH.asECPublicKey(publicKeyAgain2), "HOLA".toByteArray(), signature2))
 
-
-    // 30450221009e9fed19dac2dcd862506f7176bdad78a27707f1b0ac4cb2c5957db400912ce502207dc85cac3079007bab377d31d64ec0644e59c501f6469680131d1a7be741ed4e
-    // 304402206e819b71c3c6463ef3f4e914574221aed3b1dc2a4db4f59a3b7330a4c0fe74ab022047899e783a0600cea3bfb9ca8858dee91085ca0497ac2a6280dcd45e3f802628
 }
