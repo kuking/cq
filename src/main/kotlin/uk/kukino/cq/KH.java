@@ -17,25 +17,29 @@ public class KH {
         Security.addProvider(new BouncyCastleProvider());
     }
 
+    //         secp256k1 - secp384r1 - secp521r1 - sect571r1
+    static final String CURVE = "secp256k1";
+
+    // SHA512withECDSA SHA256withECDSA SHA1withECDSA
+    static final String SIGN = "SHA512withECDSA";
+
+
     public static KeyPair getKeyPair() throws NoSuchAlgorithmException, NoSuchProviderException, InvalidAlgorithmParameterException {
         KeyPairGenerator keyGen = KeyPairGenerator.getInstance("ECDsA", "BC");
-        // secp256k1 - secp384r1 - secp521r1 - sect571r1
-//        ECGenParameterSpec ecSpec = new ECGenParameterSpec("secp256k1");
-        ECGenParameterSpec ecSpec = new ECGenParameterSpec("sect571r1");
+        ECGenParameterSpec ecSpec = new ECGenParameterSpec(CURVE);
         keyGen.initialize(ecSpec, new SecureRandom());
         return keyGen.generateKeyPair();
     }
 
-    public static byte[] sign(KeyPair keyPair, byte[] payload) throws NoSuchAlgorithmException, InvalidKeyException, SignatureException {
-//        Signature signature = Signature.getInstance("SHA512withECDsA");
-        Signature signature = Signature.getInstance("SHA256withECDsA");
-        signature.initSign(keyPair.getPrivate());
+    public static byte[] sign(PrivateKey key, byte[] payload) throws NoSuchAlgorithmException, InvalidKeyException, SignatureException {
+        Signature signature = Signature.getInstance(SIGN);
+        signature.initSign(key);
         signature.update(payload);
         return signature.sign();
     }
 
     public static boolean verify(ECPublicKey publicKey, byte[] payload, byte[] sign) throws NoSuchAlgorithmException, InvalidKeyException, SignatureException {
-        Signature signature = Signature.getInstance("SHA256withECDsA");
+        Signature signature = Signature.getInstance(SIGN);
         signature.initVerify(publicKey);
         signature.update(payload);
         return signature.verify(sign);

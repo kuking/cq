@@ -3,12 +3,11 @@
  */
 package uk.kukino.cq
 
+import org.bouncycastle.util.encoders.Base64
+import org.bouncycastle.util.encoders.Hex
 import java.math.BigInteger
-
-
-fun hexDump(bytes: ByteArray): String {
-    return bytes.joinToString("") { String.format("%02x", it) }
-}
+import java.nio.charset.Charset
+import java.security.spec.X509EncodedKeySpec
 
 
 fun main(rgs: Array<String>) {
@@ -20,25 +19,39 @@ fun main(rgs: Array<String>) {
 
     val kp = KH.getKeyPair()
 
-    println(hexDump(kp.public.encoded))
+    println(Hex.toHexString(kp.public.encoded))
     val publicKeyAgain = KH.bytesToPublicKey(kp.public.encoded)
 
-//    println(kp.public)
-    println("Public: " + hexDump(KH.asECPublicKey(kp.public).encoded))
-    println("Public.X: " + KH.asECPublicKey(kp.public).w.affineX.toString(16))
-    println("Public.Y: " + KH.asECPublicKey(kp.public).w.affineY.toString(16))
+    val ecPublic = KH.asECPublicKey(kp.public)
+    println("Public: " + Hex.toHexString(KH.asECPublicKey(kp.public).encoded))
+    val b64public = Base64.toBase64String(X509EncodedKeySpec(kp.public.encoded).encoded)
+    println("Base64: $b64public")
+    val publicKeyAgain2 = KH.bytesToPublicKey(Base64.decode(b64public))
+
     println("------")
 
-
-    println(hexDump(kp.private.encoded))
-//    println(kp.private)
     println("Private: " + KH.asECPrivateKey(kp.private).s.toString(16))
+    val b64private = Base64.toBase64String(X509EncodedKeySpec(kp.private.encoded).encoded)
+    println("Base64: $b64private")
+
+    val privateKeyAgain = KH.bytesToPrivateKey(Base64.decode(b64private))
 
     println("------")
-    var signature = KH.sign(kp, "HOLA".toByteArray())
+    var signature = KH.sign(kp.private, "HOLA".toByteArray(Charset.defaultCharset()))
     println("Signature: " + BigInteger(signature).toString(16))
+    println("Signature64: " + Base64.toBase64String(signature));
     println("Verify: " + KH.verify(KH.asECPublicKey(kp.public), "HOLA".toByteArray(), signature))
-    println("Verify2: " + KH.verify(KH.asECPublicKey(publicKeyAgain), "HOLA".toByteArray(), signature))
+    println("Verify1: " + KH.verify(KH.asECPublicKey(publicKeyAgain), "HOLA".toByteArray(), signature))
+    println("Verify2: " + KH.verify(KH.asECPublicKey(publicKeyAgain2), "HOLA".toByteArray(), signature))
+
+    var signature2 = KH.sign(privateKeyAgain, "HOLA".toByteArray(Charset.defaultCharset()))
+    println("Signature: " + BigInteger(signature2).toString(16))
+    println("Signature64: " + Base64.toBase64String(signature2));
+    println("Verify: " + KH.verify(KH.asECPublicKey(kp.public), "HOLA".toByteArray(), signature2))
+    println("Verify1: " + KH.verify(KH.asECPublicKey(publicKeyAgain), "HOLA".toByteArray(), signature2))
+    println("Verify2: " + KH.verify(KH.asECPublicKey(publicKeyAgain2), "HOLA".toByteArray(), signature2))
 
 
+    // 30450221009e9fed19dac2dcd862506f7176bdad78a27707f1b0ac4cb2c5957db400912ce502207dc85cac3079007bab377d31d64ec0644e59c501f6469680131d1a7be741ed4e
+    // 304402206e819b71c3c6463ef3f4e914574221aed3b1dc2a4db4f59a3b7330a4c0fe74ab022047899e783a0600cea3bfb9ca8858dee91085ca0497ac2a6280dcd45e3f802628
 }
