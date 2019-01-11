@@ -14,9 +14,9 @@ import java.security.spec.ECPrivateKeySpec
 import java.security.spec.ECPublicKeySpec
 
 
-class CH(val curve: String = "secp256k1",
-         val sign: String = "SHA512withECDSA",
-         val rand: SecureRandom = SecureRandom()) {
+class ECH(val curve: String = "secp256k1",
+          val signAlgo: String = "SHA512withECDSA",
+          val rand: SecureRandom = SecureRandom()) {
 
     val keySpec: ECNamedCurveSpec
 
@@ -30,7 +30,7 @@ class CH(val curve: String = "secp256k1",
 
     @Throws(NoSuchAlgorithmException::class, NoSuchProviderException::class, InvalidAlgorithmParameterException::class)
     fun createKeyPair(): KeyPair {
-        val keyGen = KeyPairGenerator.getInstance("ECDsA", "BC")
+        val keyGen = KeyPairGenerator.getInstance("ECDSA", "BC")
         val ecSpec = ECGenParameterSpec(this.curve)
         keyGen.initialize(ecSpec, this.rand)
         return keyGen.generateKeyPair()
@@ -55,4 +55,19 @@ class CH(val curve: String = "secp256k1",
         val point = ECPoint(x, y)
         return keyFactory().generatePublic(ECPublicKeySpec(point, keySpec)) as ECPublicKey
     }
+
+    fun sign(pvt: PrivateKey, payload: ByteArray): ByteArray {
+        val signature = Signature.getInstance(signAlgo)
+        signature.initSign(pvt)
+        signature.update(payload)
+        return signature.sign()
+    }
+
+    fun verify(pub: PublicKey, payload: ByteArray, sign: ByteArray): Boolean {
+        val signature = Signature.getInstance(signAlgo)
+        signature.initVerify(pub)
+        signature.update(payload)
+        return signature.verify(sign)
+    }
+
 }

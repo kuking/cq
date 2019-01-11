@@ -3,10 +3,11 @@ package uk.kukino.cq
 import org.junit.Test
 import java.security.interfaces.ECPrivateKey
 import java.security.interfaces.ECPublicKey
+import kotlin.random.Random
 
-class CHTtest {
+class ECHTtest {
 
-    val underTest = CH()
+    val underTest = ECH()
 
     @Test
     fun it_creates_key_pairs_with_correct_specs() {
@@ -35,5 +36,21 @@ class CHTtest {
         assert(serialised == roundtrip)
     }
 
+    @Test
+    fun it_signs_and_verify() {
+        val kp = underTest.createKeyPair()
+        val payload = Random(System.currentTimeMillis()).nextBytes(2500)
+        val signature = underTest.sign(kp.private, payload)
+        assert(underTest.verify(kp.public, payload, signature))
+    }
+
+    @Test
+    fun it_really_signs_and_verifies() {
+        val kp = underTest.createKeyPair()
+        val payload = Random(System.currentTimeMillis()).nextBytes(2500)
+        val signature = underTest.sign(kp.private, payload)
+        payload[0] = 0
+        assert(!underTest.verify(kp.public, payload, signature))
+    }
 
 }
