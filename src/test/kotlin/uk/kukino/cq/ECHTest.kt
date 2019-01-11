@@ -41,7 +41,7 @@ class ECHTtest {
     @Test
     fun it_signs_and_verify() {
         val kp = ech.createKeyPair()
-        val payload = Random(System.currentTimeMillis()).nextBytes(2500)
+        val payload = Random.nextBytes(2500)
         val signature = ech.sign(kp.private, payload)
         assert(ech.verify(kp.public, payload, signature))
     }
@@ -49,7 +49,7 @@ class ECHTtest {
     @Test
     fun it_really_signs_and_verifies() {
         val kp = ech.createKeyPair()
-        val payload = Random(System.currentTimeMillis()).nextBytes(2500)
+        val payload = Random.nextBytes(2500)
         val signature = ech.sign(kp.private, payload)
         payload[0] = 0
         assert(!ech.verify(kp.public, payload, signature))
@@ -78,6 +78,7 @@ class ECHTtest {
 
         val keyABb64 = Base64.toBase64String(keyAB.encoded)
         val keyBAb64 = Base64.toBase64String(keyBA.encoded)
+
         assert(keyAB == keyBA)
         assert(keyABb64 == keyBAb64)
     }
