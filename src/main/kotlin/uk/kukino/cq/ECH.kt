@@ -41,6 +41,15 @@ class ECH(val curve: String = "secp256k1",
         return keyGen.generateKeyPair()
     }
 
+    fun privateAsB58(pvtKey: PrivateKey): String {
+        val ecPvt = pvtKey as ECPrivateKey
+        return BaseN.B58.encode(ecPvt.s)
+    }
+
+    fun privateFromB58(b58: String): PrivateKey {
+        return keyFactory().generatePrivate(ECPrivateKeySpec(BaseN.B58.decode(b58), keySpec)) as ECPrivateKey
+    }
+
     fun privateAsB64(pvtKey: PrivateKey): String {
         val ecPvt = pvtKey as ECPrivateKey
         return Base64.toBase64String(ecPvt.s.toByteArray())

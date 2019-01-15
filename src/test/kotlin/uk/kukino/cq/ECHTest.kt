@@ -24,7 +24,6 @@ class ECHTtest {
     fun it_round_trips_private_b64() {
         val kp = ech.createKeyPair()
         val serialised = ech.privateAsB64(kp.private)
-        println(serialised)
         val roundtrip = ech.privateAsB64(ech.privateFromB64(serialised))
         assert(serialised == roundtrip)
     }
@@ -33,8 +32,15 @@ class ECHTtest {
     fun it_round_trips_public_b64() {
         val kp = ech.createKeyPair()
         val serialised = ech.publicAsB64(kp.public)
-        print(serialised)
         val roundtrip = ech.publicAsB64(ech.publicFromB64(serialised))
+        assert(serialised == roundtrip)
+    }
+
+    @Test
+    fun it_round_trips_private_b58() {
+        val kp = ech.createKeyPair()
+        val serialised = ech.privateAsB58(kp.private)
+        val roundtrip = ech.privateAsB58(ech.privateFromB58(serialised))
         assert(serialised == roundtrip)
     }
 
@@ -42,7 +48,6 @@ class ECHTtest {
     fun it_round_trips_public_b58() {
         val kp = ech.createKeyPair()
         val serialised = ech.publicAsB58(kp.public)
-        print(serialised)
         val roundtrip = ech.publicAsB58(ech.publicFromB58(serialised))
         assert(serialised == roundtrip)
     }

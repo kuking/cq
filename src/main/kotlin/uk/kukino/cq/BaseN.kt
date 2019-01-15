@@ -27,6 +27,8 @@ class BaseN(private val alphabet: CharArray) {
         }
     }
 
+    fun encode(source: ByteArray): String = encode(BaseN.fromUnsigned(source))
+
     fun encode(source: BigInteger): String {
         var work = BigInteger(1, source.toByteArray())
         var qr: Array<BigInteger>
