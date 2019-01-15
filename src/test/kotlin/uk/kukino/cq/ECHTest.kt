@@ -39,6 +39,15 @@ class ECHTtest {
     }
 
     @Test
+    fun it_round_trips_public_b58() {
+        val kp = ech.createKeyPair()
+        val serialised = ech.publicAsB58(kp.public)
+        print(serialised)
+        val roundtrip = ech.publicAsB58(ech.publicFromB58(serialised))
+        assert(serialised == roundtrip)
+    }
+
+    @Test
     fun it_signs_and_verify() {
         val kp = ech.createKeyPair()
         val payload = Random.nextBytes(2500)
@@ -56,14 +65,14 @@ class ECHTtest {
     }
 
     @Test
-    fun it_encrypts_decrypts() {
-        val keyBits = Random.nextBytes(128 / 8)
+    fun it_encrypts_decrypts_symmetric() {
+        val keyBits = Random.nextBytes(256 / 8)
         val key = SecretKeySpec(keyBits, "AES")
         val iv = Random.nextBytes(128 / 8)
         val payload = Random.nextBytes(3500)
 
-        val enc = ech.encrypt(key, iv, payload)
-        val dec = ech.decrypt(key, iv, enc)
+        val enc = ech.encryptS(key, iv, payload)
+        val dec = ech.decryptS(key, iv, enc)
 
         assert(payload.contentEquals(dec))
     }

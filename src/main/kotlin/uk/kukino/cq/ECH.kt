@@ -55,8 +55,19 @@ class ECH(val curve: String = "secp256k1",
         return Base64.toBase64String(pub.w.affineX.toByteArray()) + "|" + Base64.toBase64String(pub.w.affineY.toByteArray())
     }
 
+    fun publicAsB58(pubKey: PublicKey): String {
+        val pub = pubKey as ECPublicKey
+        return BaseN.B58.encode(pub.w.affineX) + "|" + BaseN.B58.encode(pub.w.affineY)
+    }
+
     fun publicFromB64(b64: String): PublicKey {
         val (x, y) = b64.split("|").map { BigInteger(Base64.decode(it)) }
+        val point = ECPoint(x, y)
+        return keyFactory().generatePublic(ECPublicKeySpec(point, keySpec)) as ECPublicKey
+    }
+
+    fun publicFromB58(b58: String): PublicKey {
+        val (x, y) = b58.split("|").map { BaseN.B58.decode(it) }
         val point = ECPoint(x, y)
         return keyFactory().generatePublic(ECPublicKeySpec(point, keySpec)) as ECPublicKey
     }
@@ -75,14 +86,14 @@ class ECH(val curve: String = "secp256k1",
         return signature.verify(sign)
     }
 
-    fun encrypt(key: SecretKey, iv: ByteArray, payload: ByteArray): ByteArray {
+    fun encryptS(key: SecretKey, iv: ByteArray, payload: ByteArray): ByteArray {
         val ivSpec = IvParameterSpec(iv)
         val cipher = Cipher.getInstance("AES/CBC/PKCS5Padding", provider)
         cipher.init(Cipher.ENCRYPT_MODE, key, ivSpec, rand)
         return cipher.doFinal(payload)
     }
 
-    fun decrypt(key: SecretKey, iv: ByteArray, payload: ByteArray): ByteArray {
+    fun decryptS(key: SecretKey, iv: ByteArray, payload: ByteArray): ByteArray {
         val ivSpec = IvParameterSpec(iv)
         val cipher = Cipher.getInstance("AES/CBC/PKCS5Padding", provider)
         cipher.init(Cipher.DECRYPT_MODE, key, ivSpec, rand)
